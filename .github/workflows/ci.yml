@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+# cmdstan-rs uses stan-services-rs and stan-inference-rs through sibling paths until they are
+# published to crates.io; both are checked out at the revisions the code was written against.
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        rust: [stable, "1.89"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: cmdstan-rs
+      - uses: actions/checkout@v4
+        with:
+          repository: adamrsophie/stan-services-rs
+          ref: c0cd1dcf12afca5955a5ceb3bf455459dd56152c
+          path: stan-services-rs
+      - uses: actions/checkout@v4
+        with:
+          repository: adamrsophie/stan-inference-rs
+          ref: 6fb9c3e2badbc922355aa95ba143bae67f5bbac7
+          path: stan-inference-rs
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.rust }}
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: cmdstan-rs
+      - working-directory: cmdstan-rs
+        run: cargo fmt --all -- --check
+      - working-directory: cmdstan-rs
+        run: cargo clippy --workspace --all-targets -- -D warnings
+      - working-directory: cmdstan-rs
+        run: cargo test --workspace
+      - working-directory: cmdstan-rs
+        run: cargo doc --workspace --no-deps
+        env:
+          RUSTDOCFLAGS: -D warnings
+
+  end-to-end:
+    # Builds the normal model, samples it, and exports a standalone executable; slow, so
+    # separate from the fast job.
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: cmdstan-rs
+      - uses: actions/checkout@v4
+        with:
+          repository: adamrsophie/stan-services-rs
+          ref: c0cd1dcf12afca5955a5ceb3bf455459dd56152c
+          path: stan-services-rs
+      - uses: actions/checkout@v4
+        with:
+          repository: adamrsophie/stan-inference-rs
+          ref: 6fb9c3e2badbc922355aa95ba143bae67f5bbac7
+          path: stan-inference-rs
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: cmdstan-rs
+      - working-directory: cmdstan-rs
+        run: cargo test -p cmdstan-rs --release -- --ignored

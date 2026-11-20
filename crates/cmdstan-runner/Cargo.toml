@@ -1,0 +1,25 @@
+[package]
+name = "cmdstan-runner"
+description = "The runtime linked into every model executable built by cmdstan-rs: CmdStan-style arguments, method dispatch to stan-services, output files, and exit codes"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[dependencies]
+stan-services.workspace = true
+stan-inference.workspace = true
+stan-model-rs.workspace = true
+stan-model-rs-stanc.workspace = true
+stanc-rs-runtime.workspace = true
+serde_json.workspace = true
+serde.workspace = true
+sha2.workspace = true
+ctrlc.workspace = true
+
+[lints]
+workspace = true

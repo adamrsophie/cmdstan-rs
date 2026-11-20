@@ -1,0 +1,32 @@
+[package]
+name = "cmdstan-rs"
+description = "Rust-native Stan compilation and Bayesian inference platform: compiles Stan programs with stanc-rs into native model executables and runs them"
+readme = "../../README.md"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[[bin]]
+name = "cmdstan-rs"
+path = "src/main.rs"
+
+[dependencies]
+cmdstan-runner.workspace = true
+stan-services.workspace = true
+stan-inference.workspace = true
+stanc-rs.workspace = true
+clap.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+ctrlc.workspace = true
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+serde_json.workspace = true

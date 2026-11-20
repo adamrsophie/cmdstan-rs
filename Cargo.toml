@@ -1,0 +1,47 @@
+[workspace]
+resolver = "3"
+members = ["crates/*"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+# File::lock (cache locking) needs 1.89.
+rust-version = "1.89"
+license = "GPL-3.0-only"
+authors = ["Adam R Sophie <adamrsophie@gmail.com>"]
+repository = "https://github.com/adamrsophie/cmdstan-rs"
+keywords = ["stan", "bayesian", "mcmc", "cmdstan", "cli"]
+categories = ["command-line-utilities", "mathematics", "science"]
+
+[workspace.dependencies]
+cmdstan-runner = { path = "crates/cmdstan-runner", version = "0.1.0" }
+# stan-services-rs and stan-inference-rs are used from sibling checkouts until they are published
+# (stan-services-rs has no commits yet). Switch to pinned git revisions once they are pushed.
+stan-services = { path = "../stan-services-rs/crates/stan-services" }
+stan-inference = { path = "../stan-inference-rs/crates/stan-inference" }
+# The model runtime and the stanc-rs adapter at the revision stan-services-rs and
+# stan-inference-rs pin, so that every crate sees one copy of the `Model` trait.
+stan-model-rs = { git = "https://github.com/adamrsophie/stan-model-rs", rev = "685c03b39b1cd1477f8259f7508c69d5fcda2f48" }
+stan-model-rs-stanc = { git = "https://github.com/adamrsophie/stan-model-rs", rev = "685c03b39b1cd1477f8259f7508c69d5fcda2f48" }
+# The compiler and the runtime its generated code targets: the revision stan-model-rs-stanc pins.
+# The compiler, the runtime, and the adapter must always be one stanc-rs revision.
+stanc-rs = { git = "https://github.com/adamrsophie/stanc-rs", rev = "242398e7bbd1754a514f221d31078254afb108f8" }
+stanc-rs-runtime = { git = "https://github.com/adamrsophie/stanc-rs", rev = "242398e7bbd1754a514f221d31078254afb108f8" }
+clap = { version = "4.6", features = ["derive"] }
+serde_json = "1"
+serde = "1"
+sha2 = "0.10"
+ctrlc = { version = "3.5", features = ["termination"] }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[workspace.lints.clippy]
+float_cmp = "allow"
+# Checks are written as `!(x > 0.0)` on purpose: the negated form rejects NaN.
+neg_cmp_op_on_partial_ord = "allow"
+too_many_arguments = "allow"
+
+[profile.test]
+opt-level = 2
